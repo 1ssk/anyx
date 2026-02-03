@@ -11,8 +11,8 @@
   <main class="dashboard">
     <header class="header">
       <div>
-        <h1>Дашборд</h1>
-        <p class="subtitle">Все ваши инвайт-ссылки и статистика</p>
+        <h1>Личный кабинет</h1>
+        <p class="subtitle">Управляйте ссылками, аналитикой и подпиской</p>
       </div>
       <div class="user-info">
         <span id="userEmail">loading...</span>
@@ -21,12 +21,21 @@
     </header>
 
     <section class="panel">
+      <div class="panel-header">
+        <h2>Подписка</h2>
+        <button id="renewButton">Продлить доступ</button>
+      </div>
+      <div id="subscriptionStatus" class="subscription"></div>
+      <p class="hint">Оплата происходит через ЮKassa. После оплаты доступ продлевается автоматически.</p>
+    </section>
+
+    <section class="panel">
       <h2>Создать ссылку</h2>
       <form id="createLinkForm" class="inline-form">
         <input type="url" name="target" placeholder="https://ваш-сайт.ru" required />
         <button type="submit">Создать инвайт</button>
       </form>
-      <p class="hint">Инвайт будет доступен по домену invite.annonyx.ru/i/&lt;код&gt;.</p>
+      <p class="hint">Инвайт будет доступен по домену <span id="domainLabel">invite.annonyx.ru</span>/i/&lt;код&gt;.</p>
     </section>
 
     <section class="panel">

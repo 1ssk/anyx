@@ -205,9 +205,26 @@ button.ghost {
   border: 1px solid rgba(90, 110, 170, 0.2);
 }
 
+.subscription {
+  display: grid;
+  gap: 12px;
+}
+
+.sub-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px;
+  border-radius: 14px;
+  background: rgba(8, 14, 28, 0.7);
+  border: 1px solid rgba(90, 110, 170, 0.2);
+}
+
 @media (max-width: 720px) {
   .link-card,
-  .stats-header {
+  .stats-header,
+  .sub-card {
     flex-direction: column;
     align-items: flex-start;
   }

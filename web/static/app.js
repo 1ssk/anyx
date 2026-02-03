@@ -1,17 +1,29 @@
 const loginForm = document.getElementById('loginForm');
 const registerForm = document.getElementById('registerForm');
 const authMessage = document.getElementById('authMessage');
+const trialDays = document.getElementById('trialDays');
+const monthlyPrice = document.getElementById('monthlyPrice');
 
 function showMessage(text, isError = true) {
   authMessage.textContent = text;
   authMessage.classList.toggle('error', isError);
 }
 
+async function fetchConfig() {
+  const response = await fetch('/api/config');
+  const data = await response.json().catch(() => ({}));
+  if (data.trial_days) {
+    trialDays.textContent = data.trial_days;
+  }
+  if (data.monthly_price) {
+    monthlyPrice.textContent = data.monthly_price;
+  }
+}
+
 async function sendAuth(url, payload) {
   const response = await fetch(url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    credentials: 'include',
     body: JSON.stringify(payload),
   });
 
@@ -19,6 +31,7 @@ async function sendAuth(url, payload) {
   if (!response.ok) {
     throw new Error(data.error || 'Ошибка авторизации');
   }
+  localStorage.setItem('token', data.token);
 }
 
 loginForm.addEventListener('submit', async (event) => {
@@ -48,3 +61,5 @@ registerForm.addEventListener('submit', async (event) => {
     showMessage(error.message);
   }
 });
+
+fetchConfig();

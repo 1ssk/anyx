@@ -4,11 +4,23 @@ const createLinkForm = document.getElementById('createLinkForm');
 const linksContainer = document.getElementById('linksContainer');
 const statsContainer = document.getElementById('statsContainer');
 const refreshLinks = document.getElementById('refreshLinks');
+const subscriptionStatus = document.getElementById('subscriptionStatus');
+const renewButton = document.getElementById('renewButton');
+const domainLabel = document.getElementById('domainLabel');
+
+let appDomain = window.location.host;
+
+function getToken() {
+  return localStorage.getItem('token');
+}
 
 async function fetchJSON(url, options = {}) {
   const response = await fetch(url, {
-    credentials: 'include',
-    headers: { 'Content-Type': 'application/json', ...(options.headers || {}) },
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${getToken()}`,
+      ...(options.headers || {}),
+    },
     ...options,
   });
   const data = await response.json().catch(() => ({}));
@@ -19,6 +31,7 @@ async function fetchJSON(url, options = {}) {
 }
 
 function formatDate(value) {
+  if (!value) return '—';
   const date = new Date(value);
   return date.toLocaleString('ru-RU');
 }
@@ -34,7 +47,7 @@ function renderLinks(links) {
     const card = document.createElement('div');
     card.className = 'link-card';
 
-    const inviteUrl = `${window.location.origin}/i/${link.code}`;
+    const inviteUrl = `${appDomain}/i/${link.code}`;
 
     card.innerHTML = `
       <div>
@@ -57,7 +70,7 @@ function renderStats(stats) {
   header.className = 'stats-header';
   header.innerHTML = `
     <div>
-      <h3>invite.annonyx.ru/i/${stats.code}</h3>
+      <h3>${appDomain}/i/${stats.code}</h3>
       <p class="hint">Целевая: ${stats.target}</p>
     </div>
     <div class="badge">Всего кликов: ${stats.total}</div>
@@ -79,10 +92,32 @@ function renderStats(stats) {
   statsContainer.appendChild(list);
 }
 
+function renderSubscription(subscription) {
+  subscriptionStatus.innerHTML = `
+    <div class="sub-card">
+      <div>
+        <h3>Статус: ${subscription.status}</h3>
+        <p class="hint">Пробный период до: ${formatDate(subscription.trial_ends_at)}</p>
+        <p class="hint">Оплачен до: ${formatDate(subscription.current_period_end)}</p>
+      </div>
+      <div class="badge">${subscription.monthly_price} ₽/месяц</div>
+    </div>
+  `;
+}
+
+async function loadConfig() {
+  const config = await fetch('/api/config').then((r) => r.json());
+  if (config.app_domain) {
+    appDomain = `https://${config.app_domain}`;
+    domainLabel.textContent = config.app_domain;
+  }
+}
+
 async function loadUser() {
   try {
     const data = await fetchJSON('/api/me');
     userEmail.textContent = data.email;
+    renderSubscription(data.subscription || {});
   } catch (error) {
     window.location.href = '/';
   }
@@ -121,8 +156,20 @@ createLinkForm.addEventListener('submit', async (event) => {
   }
 });
 
+renewButton.addEventListener('click', async () => {
+  try {
+    const data = await fetchJSON('/api/billing/checkout', { method: 'POST' });
+    if (data.checkout_url) {
+      window.open(data.checkout_url, '_blank');
+    }
+    await loadUser();
+  } catch (error) {
+    subscriptionStatus.innerHTML = `<p class="hint error">${error.message}</p>`;
+  }
+});
+
 logoutButton.addEventListener('click', () => {
-  document.cookie = 'invite_session=; Max-Age=0; path=/';
+  localStorage.removeItem('token');
   window.location.href = '/';
 });
 
@@ -130,5 +177,7 @@ refreshLinks.addEventListener('click', () => {
   loadLinks();
 });
 
-loadUser();
-loadLinks();
+loadConfig().then(() => {
+  loadUser();
+  loadLinks();
+});
