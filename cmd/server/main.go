@@ -33,11 +33,12 @@ func main() {
 
 	jwtService := services.NewJWTService(cfg.JWTSecret, cfg.JWTTTL)
 	billingService := services.NewBillingService(cfg)
+	yookassaService := services.NewYooKassaService(cfg)
 
 	authHandler := handlers.NewAuthHandler(db, jwtService, cfg)
 	linkHandler := handlers.NewLinkHandler(db, cfg)
 	userHandler := handlers.NewUserHandler(db, cfg)
-	billingHandler := handlers.NewBillingHandler(db, billingService)
+	billingHandler := handlers.NewBillingHandler(db, billingService, yookassaService, cfg)
 	adminHandler := handlers.NewAdminHandler(db)
 
 	r := gin.Default()
@@ -53,6 +54,8 @@ func main() {
 	r.GET("/api/config", handlers.ConfigHandler(cfg))
 	r.POST("/api/register", authHandler.Register)
 	r.POST("/api/login", authHandler.Login)
+
+	r.POST("/api/webhook/yookassa", billingHandler.Webhook)
 
 	r.GET("/i/:code", linkHandler.Redirect)
 

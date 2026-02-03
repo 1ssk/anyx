@@ -31,7 +31,7 @@ async function fetchJSON(url, options = {}) {
 }
 
 function formatDate(value) {
-  if (!value) return '—';
+  if (!value || value.startsWith('0001-01-01')) return '—';
   const date = new Date(value);
   return date.toLocaleString('ru-RU');
 }

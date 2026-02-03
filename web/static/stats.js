@@ -31,6 +31,40 @@ function formatDate(value) {
   return date.toLocaleString('ru-RU');
 }
 
+function buildChart(clicks) {
+  const hours = Array.from({ length: 24 }, (_, idx) => idx);
+  const counts = hours.map(() => 0);
+
+  clicks.forEach((click) => {
+    const date = new Date(click.clicked_at);
+    const hour = date.getHours();
+    counts[hour] += 1;
+  });
+
+  const max = Math.max(...counts, 1);
+
+  const wrapper = document.createElement('div');
+  wrapper.className = 'chart';
+
+  hours.forEach((hour, idx) => {
+    const bar = document.createElement('div');
+    bar.className = 'chart-bar';
+
+    const fill = document.createElement('div');
+    fill.className = 'chart-fill';
+    fill.style.height = `${(counts[idx] / max) * 100}%`;
+
+    const label = document.createElement('span');
+    label.textContent = `${hour}:00`;
+
+    bar.appendChild(fill);
+    bar.appendChild(label);
+    wrapper.appendChild(bar);
+  });
+
+  return wrapper;
+}
+
 function renderStats(stats) {
   statsContainer.innerHTML = '';
   const header = document.createElement('div');
@@ -48,6 +82,9 @@ function renderStats(stats) {
     statsContainer.innerHTML += '<p class="hint">Пока нет переходов.</p>';
     return;
   }
+
+  const chart = buildChart(stats.clicks);
+  statsContainer.appendChild(chart);
 
   const list = document.createElement('ul');
   list.className = 'click-list';

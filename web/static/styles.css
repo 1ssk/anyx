@@ -224,6 +224,40 @@ button.ghost {
   color: #d3defc;
 }
 
+.chart {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: 8px;
+  margin-bottom: 16px;
+  padding: 12px;
+  border-radius: 12px;
+  background: rgba(8, 14, 28, 0.7);
+  border: 1px solid rgba(90, 110, 170, 0.2);
+}
+
+.chart-bar {
+  position: relative;
+  height: 120px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  font-size: 10px;
+  color: #a9b6dd;
+}
+
+.chart-fill {
+  width: 100%;
+  border-radius: 8px 8px 4px 4px;
+  background: linear-gradient(180deg, #6f9dff, #3b5cff);
+  box-shadow: 0 8px 12px rgba(76, 125, 255, 0.3);
+  transition: height 0.2s ease;
+}
+
+.chart-bar span {
+  position: absolute;
+  bottom: -16px;
+}
+
 .click-list {
   list-style: none;
   padding: 0;
@@ -261,6 +295,10 @@ button.ghost {
   .sub-card {
     flex-direction: column;
     align-items: flex-start;
+  }
+
+  .chart {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
   }
 
   button {
