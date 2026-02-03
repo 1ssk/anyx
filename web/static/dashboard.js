@@ -36,6 +36,14 @@ function formatDate(value) {
   return date.toLocaleString('ru-RU');
 }
 
+function setAccessState(isBlocked) {
+  createLinkForm.querySelector('button').disabled = isBlocked;
+  refreshLinks.disabled = isBlocked;
+  if (isBlocked) {
+    linksContainer.innerHTML = '<p class="hint error">Оплатите подписку, чтобы видеть и создавать ссылки.</p>';
+  }
+}
+
 function renderLinks(links) {
   linksContainer.innerHTML = '';
   if (!links.length) {
@@ -105,8 +113,13 @@ async function loadUser() {
 async function loadLinks() {
   try {
     const links = await fetchJSON('/api/links');
+    setAccessState(false);
     renderLinks(links);
   } catch (error) {
+    if (error.message.includes('Оплатите подписку')) {
+      setAccessState(true);
+      return;
+    }
     linksContainer.innerHTML = `<p class="hint error">${error.message}</p>`;
   }
 }

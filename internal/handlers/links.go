@@ -9,6 +9,7 @@ import (
 
 	"anyx/internal/config"
 	"anyx/internal/models"
+	"anyx/internal/services"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -28,6 +29,20 @@ func NewLinkHandler(db *gorm.DB, cfg config.Config) *LinkHandler {
 // List возвращает список ссылок пользователя.
 func (h *LinkHandler) List(c *gin.Context) {
 	userID := c.GetUint("user_id")
+	role := c.GetString("user_role")
+
+	if role != "admin" {
+		allowed, err := h.hasAccess(userID)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Не удалось проверить подписку"})
+			return
+		}
+		if !allowed {
+			c.JSON(http.StatusPaymentRequired, gin.H{"error": "Оплатите подписку для доступа к ссылкам"})
+			return
+		}
+	}
+
 	var links []models.InviteLink
 	if err := h.db.Where("user_id = ?", userID).Order("created_at desc").Find(&links).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Не удалось загрузить ссылки"})
@@ -50,6 +65,20 @@ func (h *LinkHandler) List(c *gin.Context) {
 // Create создает инвайт-ссылку.
 func (h *LinkHandler) Create(c *gin.Context) {
 	userID := c.GetUint("user_id")
+	role := c.GetString("user_role")
+
+	if role != "admin" {
+		allowed, err := h.hasAccess(userID)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Не удалось проверить подписку"})
+			return
+		}
+		if !allowed {
+			c.JSON(http.StatusPaymentRequired, gin.H{"error": "Оплатите подписку для создания ссылок"})
+			return
+		}
+	}
+
 	var req struct {
 		TargetURL string `json:"target_url"`
 	}
@@ -80,6 +109,20 @@ func (h *LinkHandler) Create(c *gin.Context) {
 // Stats возвращает статистику кликов.
 func (h *LinkHandler) Stats(c *gin.Context) {
 	userID := c.GetUint("user_id")
+	role := c.GetString("user_role")
+
+	if role != "admin" {
+		allowed, err := h.hasAccess(userID)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Не удалось проверить подписку"})
+			return
+		}
+		if !allowed {
+			c.JSON(http.StatusPaymentRequired, gin.H{"error": "Оплатите подписку для доступа к статистике"})
+			return
+		}
+	}
+
 	var link models.InviteLink
 	if err := h.db.Where("id = ? AND user_id = ?", c.Param("id"), userID).First(&link).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Ссылка не найдена"})
@@ -117,6 +160,15 @@ func (h *LinkHandler) Redirect(c *gin.Context) {
 	_ = h.db.Create(&click).Error
 
 	c.Redirect(http.StatusFound, link.TargetURL)
+}
+
+func (h *LinkHandler) hasAccess(userID uint) (bool, error) {
+	var subscription models.Subscription
+	if err := h.db.Where("user_id = ?", userID).First(&subscription).Error; err != nil {
+		return false, err
+	}
+
+	return services.HasAccess(subscription), nil
 }
 
 func generateCode(length int) (string, error) {

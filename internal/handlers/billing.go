@@ -3,7 +3,10 @@ package handlers
 import (
 	"crypto/subtle"
 	"io"
+	"log"
+	"net"
 	"net/http"
+	"strings"
 	"time"
 
 	"anyx/internal/config"
@@ -54,6 +57,7 @@ func (h *BillingHandler) Checkout(c *gin.Context) {
 
 	confirmation, err := h.yookassa.CreatePayment(userID, h.cfg.MonthlyPrice, h.cfg.CheckoutReturn)
 	if err != nil {
+		log.Printf("ошибка создания оплаты: %v", err)
 		c.JSON(http.StatusBadGateway, gin.H{"error": "Не удалось создать оплату"})
 		return
 	}
@@ -71,9 +75,16 @@ func (h *BillingHandler) Checkout(c *gin.Context) {
 
 // Webhook принимает уведомления от ЮKassa.
 func (h *BillingHandler) Webhook(c *gin.Context) {
+	if !h.isAllowedIP(c.ClientIP()) {
+		log.Printf("webhook ip blocked: %s", c.ClientIP())
+		c.JSON(http.StatusForbidden, gin.H{"error": "Запрещенный IP"})
+		return
+	}
+
 	if h.cfg.WebhookSecret != "" {
 		secret := c.GetHeader("Authorization")
 		if subtle.ConstantTimeCompare([]byte(secret), []byte(h.cfg.WebhookSecret)) != 1 {
+			log.Printf("webhook secret mismatch")
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "Неверный секрет"})
 			return
 		}
@@ -93,9 +104,12 @@ func (h *BillingHandler) Webhook(c *gin.Context) {
 
 	userID := event.Object.Meta.UserID
 	if userID == 0 {
+		log.Printf("webhook without user_id: event=%s", event.Event)
 		c.JSON(http.StatusOK, gin.H{"status": "ignored"})
 		return
 	}
+
+	log.Printf("webhook event: %s user=%d status=%s", event.Event, userID, event.Object.Status)
 
 	switch event.Event {
 	case "payment.succeeded":
@@ -134,4 +148,35 @@ func (h *BillingHandler) Webhook(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"status": "ok"})
+}
+
+func (h *BillingHandler) isAllowedIP(ip string) bool {
+	if h.cfg.WebhookIPAllowlist == "" {
+		return true
+	}
+
+	parsedIP := net.ParseIP(ip)
+	if parsedIP == nil {
+		return false
+	}
+
+	entries := strings.Split(h.cfg.WebhookIPAllowlist, ",")
+	for _, entry := range entries {
+		entry = strings.TrimSpace(entry)
+		if entry == "" {
+			continue
+		}
+		if strings.Contains(entry, "/") {
+			_, network, err := net.ParseCIDR(entry)
+			if err == nil && network.Contains(parsedIP) {
+				return true
+			}
+			continue
+		}
+		if parsedIP.Equal(net.ParseIP(entry)) {
+			return true
+		}
+	}
+
+	return false
 }
