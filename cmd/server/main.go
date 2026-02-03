@@ -39,7 +39,10 @@ func main() {
 	r.Static("/static", "web/static")
 
 	r.GET("/", func(c *gin.Context) { c.File("web/index.html") })
+	r.GET("/login", func(c *gin.Context) { c.File("web/login.html") })
+	r.GET("/register", func(c *gin.Context) { c.File("web/register.html") })
 	r.GET("/dashboard", func(c *gin.Context) { c.File("web/dashboard.html") })
+	r.GET("/stats", func(c *gin.Context) { c.File("web/stats.html") })
 
 	r.GET("/api/config", handlers.ConfigHandler(cfg))
 	r.POST("/api/register", authHandler.Register)

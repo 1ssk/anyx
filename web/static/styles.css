@@ -18,6 +18,15 @@ body {
   color: inherit;
 }
 
+a {
+  color: #9fb3ff;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
 .stars {
   position: fixed;
   inset: 0;
@@ -71,6 +80,10 @@ h1, h2, h3 {
   border: 1px solid rgba(90, 110, 170, 0.2);
 }
 
+.card.single {
+  max-width: 420px;
+}
+
 label {
   display: flex;
   flex-direction: column;
@@ -105,6 +118,16 @@ button:hover {
 
 button.ghost {
   background: transparent;
+  border: 1px solid rgba(112, 130, 190, 0.5);
+  color: #cdd7f6;
+}
+
+.ghost-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: 999px;
   border: 1px solid rgba(112, 130, 190, 0.5);
   color: #cdd7f6;
 }
@@ -168,6 +191,7 @@ button.ghost {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 12px;
   padding: 16px;
   border-radius: 14px;
   border: 1px solid rgba(90, 110, 170, 0.2);

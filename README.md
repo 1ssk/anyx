@@ -6,7 +6,7 @@
 
 - Регистрация и вход (JWT).
 - Создание инвайт‑ссылок на целевые URL.
-- Статистика кликов по времени.
+- Статистика кликов по времени (отдельная страница).
 - Личный кабинет с подпиской: пробный период 7 дней, далее 150 ₽/месяц (ЮKassa).
 
 ## Стек
@@ -36,7 +36,25 @@ go run ./cmd/server
 
 ```bash
 docker build -t invite .
-docker run --env-file .env -p 8080:8080 invite
+docker run --env-file .env -p 8080:8080 -v $(pwd)/invite.db:/app/invite.db invite
+```
+
+> Важно: база SQLite хранится в файле `invite.db`. Чтобы данные не терялись при перезапуске контейнера, используйте volume как в примере выше.
+
+## Пример Nginx (proxy)
+
+```nginx
+server {
+    listen 80;
+    server_name invite.annonyx.ru;
+
+    location / {
+        proxy_pass http://127.0.0.1:8080;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    }
+}
 ```
 
 ## Переменные окружения
@@ -49,17 +67,22 @@ docker run --env-file .env -p 8080:8080 invite
 - `MONTHLY_PRICE_RUB` — стоимость подписки.
 - `YOOKASSA_SHOP_ID`, `YOOKASSA_SECRET` — креды ЮKassa.
 
-## Основные маршруты
+## Страницы
 
-- `GET /` — страница входа.
-- `GET /dashboard` — личный кабинет.
+- `/login` — вход.
+- `/register` — регистрация.
+- `/dashboard` — личный кабинет.
+- `/stats?id=<ID>` — статистика по ссылке.
+
+## Основные маршруты API
+
 - `POST /api/register` — регистрация.
 - `POST /api/login` — вход.
 - `GET /api/links` — список ссылок.
 - `POST /api/links` — создать ссылку.
 - `GET /api/links/:id/stats` — статистика кликов.
 - `POST /api/billing/checkout` — создать оплату (заглушка).
-- `GET /i/:code` — редирект по инвайт‑ссылке.
+- `GET /i/:code` — редирект по инвайт‑ссылке (фиксирует клик).
 
 ## Что нужно доработать для продакшена
 

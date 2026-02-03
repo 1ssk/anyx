@@ -2,7 +2,6 @@ const userEmail = document.getElementById('userEmail');
 const logoutButton = document.getElementById('logoutButton');
 const createLinkForm = document.getElementById('createLinkForm');
 const linksContainer = document.getElementById('linksContainer');
-const statsContainer = document.getElementById('statsContainer');
 const refreshLinks = document.getElementById('refreshLinks');
 const subscriptionStatus = document.getElementById('subscriptionStatus');
 const renewButton = document.getElementById('renewButton');
@@ -55,41 +54,11 @@ function renderLinks(links) {
         <p class="hint">Целевая: ${link.target_url}</p>
         <p class="hint">Создано: ${formatDate(link.created_at)}</p>
       </div>
-      <button class="ghost">Статистика</button>
+      <a class="ghost-link" href="/stats?id=${link.id}">Статистика</a>
     `;
-
-    card.querySelector('button').addEventListener('click', () => loadStats(link.id));
 
     linksContainer.appendChild(card);
   });
-}
-
-function renderStats(stats) {
-  statsContainer.innerHTML = '';
-  const header = document.createElement('div');
-  header.className = 'stats-header';
-  header.innerHTML = `
-    <div>
-      <h3>${appDomain}/i/${stats.code}</h3>
-      <p class="hint">Целевая: ${stats.target}</p>
-    </div>
-    <div class="badge">Всего кликов: ${stats.total}</div>
-  `;
-  statsContainer.appendChild(header);
-
-  if (!stats.clicks.length) {
-    statsContainer.innerHTML += '<p class="hint">Пока нет переходов.</p>';
-    return;
-  }
-
-  const list = document.createElement('ul');
-  list.className = 'click-list';
-  stats.clicks.forEach((click) => {
-    const item = document.createElement('li');
-    item.textContent = formatDate(click.clicked_at);
-    list.appendChild(item);
-  });
-  statsContainer.appendChild(list);
 }
 
 function renderSubscription(subscription) {
@@ -119,7 +88,7 @@ async function loadUser() {
     userEmail.textContent = data.email;
     renderSubscription(data.subscription || {});
   } catch (error) {
-    window.location.href = '/';
+    window.location.href = '/login';
   }
 }
 
@@ -129,15 +98,6 @@ async function loadLinks() {
     renderLinks(links);
   } catch (error) {
     linksContainer.innerHTML = `<p class="hint error">${error.message}</p>`;
-  }
-}
-
-async function loadStats(id) {
-  try {
-    const stats = await fetchJSON(`/api/links/${id}/stats`);
-    renderStats(stats);
-  } catch (error) {
-    statsContainer.innerHTML = `<p class="hint error">${error.message}</p>`;
   }
 }
 
@@ -152,7 +112,7 @@ createLinkForm.addEventListener('submit', async (event) => {
     createLinkForm.reset();
     await loadLinks();
   } catch (error) {
-    statsContainer.innerHTML = `<p class="hint error">${error.message}</p>`;
+    linksContainer.innerHTML = `<p class="hint error">${error.message}</p>`;
   }
 });
 
@@ -170,7 +130,7 @@ renewButton.addEventListener('click', async () => {
 
 logoutButton.addEventListener('click', () => {
   localStorage.removeItem('token');
-  window.location.href = '/';
+  window.location.href = '/login';
 });
 
 refreshLinks.addEventListener('click', () => {

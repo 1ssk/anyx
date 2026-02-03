@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Invite | Вход</title>
+  <link rel="stylesheet" href="/static/styles.css" />
+</head>
+<body>
+  <div class="stars"></div>
+  <main class="auth">
+    <section class="panel">
+      <h1>Invite</h1>
+      <p class="subtitle">Вход в личный кабинет</p>
+      <form id="loginForm" class="card single">
+        <label>
+          Email
+          <input type="email" name="email" required />
+        </label>
+        <label>
+          Пароль
+          <input type="password" name="password" required minlength="6" />
+        </label>
+        <button type="submit">Войти</button>
+        <p class="hint">Нет аккаунта? <a href="/register">Зарегистрироваться</a></p>
+      </form>
+      <p id="authMessage" class="message"></p>
+    </section>
+  </main>
+  <script src="/static/login.js"></script>
+</body>
+</html>

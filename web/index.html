@@ -2,8 +2,9 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8" />
+  <meta http-equiv="refresh" content="0; url=/login" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Invite | Вход</title>
+  <title>Invite | Перенаправление</title>
   <link rel="stylesheet" href="/static/styles.css" />
 </head>
 <body>
@@ -11,37 +12,9 @@
   <main class="auth">
     <section class="panel">
       <h1>Invite</h1>
-      <p class="subtitle">Маркетинговые инвайт-ссылки с аналитикой</p>
-      <div class="grid">
-        <form id="loginForm" class="card">
-          <h2>Вход</h2>
-          <label>
-            Email
-            <input type="email" name="email" required />
-          </label>
-          <label>
-            Пароль
-            <input type="password" name="password" required minlength="6" />
-          </label>
-          <button type="submit">Войти</button>
-        </form>
-        <form id="registerForm" class="card">
-          <h2>Регистрация</h2>
-          <label>
-            Email
-            <input type="email" name="email" required />
-          </label>
-          <label>
-            Пароль
-            <input type="password" name="password" required minlength="6" />
-          </label>
-          <button type="submit">Создать аккаунт</button>
-          <p class="hint">Пробный период — <span id="trialDays">7</span> дней, далее <span id="monthlyPrice">150</span> ₽/месяц через ЮKassa.</p>
-        </form>
-      </div>
-      <p id="authMessage" class="message"></p>
+      <p class="subtitle">Перенаправляем на страницу входа...</p>
+      <a class="ghost-link" href="/login">Перейти вручную</a>
     </section>
   </main>
-  <script src="/static/app.js"></script>
 </body>
 </html>
