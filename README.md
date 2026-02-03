@@ -68,6 +68,8 @@ server {
 - `MONTHLY_PRICE_RUB` — стоимость подписки.
 - `YOOKASSA_SHOP_ID`, `YOOKASSA_SECRET` — креды ЮKassa.
 - `CHECKOUT_RETURN_URL` — URL возврата после оплаты.
+- `WEBHOOK_URL` — URL, который нужно указать в кабинете ЮKassa (например, `https://test.annonyx.ru:8443/webhook`).
+- `WEBHOOK_SECRET` — секрет для проверки вебхуков (сравнивается с заголовком `Authorization`).
 - `ADMIN_EMAIL`, `ADMIN_PASSWORD` — учетная запись администратора (создается автоматически).
 
 ## Страницы
@@ -88,6 +90,7 @@ server {
 - `POST /api/billing/checkout` — создать оплату (ЮKassa).
 - `POST /api/webhook/yookassa` — вебхук от ЮKassa.
 - `POST /webhook` — вебхук (совместим с кабинетом ЮKassa).
+- `POST /webhook/yookassa` — альтернативный путь вебхука.
 - `GET /i/:code` — редирект по инвайт‑ссылке (фиксирует клик).
 - `GET /api/admin/users` — список пользователей.
 - `GET /api/admin/users/:id` — детали пользователя.
@@ -96,11 +99,12 @@ server {
 ## ЮKassa
 
 - Интеграция повторяет официальную схему: создаем платеж через API `v3/payments` с `confirmation.redirect`, используем `Idempotence-Key` и Basic Auth.
-- Вебхук ожидает события `payment.succeeded`, `payment.waiting_for_capture`, `payment.canceled` и обновляет статус подписки.
+- Для кабинета ЮKassa в разделе HTTP‑уведомлений используйте `WEBHOOK_URL` и события: `payment.succeeded`, `payment.waiting_for_capture`, `payment.canceled`.
+- Вебхук ожидает событие `payment.succeeded` и активирует подписку пользователя по metadata (`user_id`, `months`).
 - Для продакшена добавьте проверку IP‑адресов и логирование входящих уведомлений.
 
 ## Что нужно доработать для продакшена
 
 - Реальная проверка безопасности вебхуков (IP allowlist / подпись).
-- Логи и мониторинг.
+- Логи.
 - Управление ролями и тарифами.

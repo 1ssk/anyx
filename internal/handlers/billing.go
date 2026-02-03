@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"crypto/subtle"
 	"io"
 	"net/http"
 	"time"
@@ -44,6 +45,11 @@ func (h *BillingHandler) Status(c *gin.Context) {
 
 // Checkout создает ссылку на оплату.
 func (h *BillingHandler) Checkout(c *gin.Context) {
+	if h.cfg.YooShopID == "" || h.cfg.YooSecretKey == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Не заполнены реквизиты ЮKassa"})
+		return
+	}
+
 	userID := c.GetUint("user_id")
 
 	confirmation, err := h.yookassa.CreatePayment(userID, h.cfg.MonthlyPrice, h.cfg.CheckoutReturn)
@@ -65,6 +71,14 @@ func (h *BillingHandler) Checkout(c *gin.Context) {
 
 // Webhook принимает уведомления от ЮKassa.
 func (h *BillingHandler) Webhook(c *gin.Context) {
+	if h.cfg.WebhookSecret != "" {
+		secret := c.GetHeader("Authorization")
+		if subtle.ConstantTimeCompare([]byte(secret), []byte(h.cfg.WebhookSecret)) != 1 {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Неверный секрет"})
+			return
+		}
+	}
+
 	body, err := io.ReadAll(c.Request.Body)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Не удалось прочитать запрос"})

@@ -24,6 +24,8 @@ type Config struct {
 	CheckoutReturn string
 	AdminEmail     string
 	AdminPassword  string
+	WebhookURL     string
+	WebhookSecret  string
 }
 
 // Load загружает конфигурацию из .env и окружения.
@@ -44,6 +46,8 @@ func Load() Config {
 		CheckoutReturn: getEnv("CHECKOUT_RETURN_URL", "http://localhost:8080/dashboard"),
 		AdminEmail:     getEnv("ADMIN_EMAIL", ""),
 		AdminPassword:  getEnv("ADMIN_PASSWORD", ""),
+		WebhookURL:     getEnv("WEBHOOK_URL", ""),
+		WebhookSecret:  getEnv("WEBHOOK_SECRET", ""),
 	}
 
 	if cfg.JWTSecret == "" {
