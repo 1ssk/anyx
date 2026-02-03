@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Invite | Админ-панель</title>
+  <link rel="stylesheet" href="/static/styles.css" />
+</head>
+<body>
+  <div class="stars"></div>
+  <main class="dashboard">
+    <header class="header">
+      <div>
+        <h1>Админ-панель</h1>
+        <p class="subtitle">Пользователи, подписки и ссылки</p>
+      </div>
+      <div class="user-info">
+        <a class="ghost-link" href="/dashboard">Назад</a>
+      </div>
+    </header>
+
+    <section class="panel">
+      <div class="panel-header">
+        <h2>Пользователи</h2>
+        <button id="refreshUsers" class="ghost">Обновить</button>
+      </div>
+      <div id="usersContainer" class="links"></div>
+    </section>
+
+    <section class="panel">
+      <h2>Детали пользователя</h2>
+      <div id="userDetail" class="stats">
+        <p class="hint">Выберите пользователя, чтобы увидеть его ссылки и подписку.</p>
+      </div>
+    </section>
+  </main>
+  <script src="/static/admin.js"></script>
+</body>
+</html>

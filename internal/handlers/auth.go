@@ -47,7 +47,7 @@ func (h *AuthHandler) Register(c *gin.Context) {
 		return
 	}
 
-	user := models.User{Email: strings.ToLower(req.Email), PasswordHash: string(hash)}
+	user := models.User{Email: strings.ToLower(req.Email), PasswordHash: string(hash), Role: "user"}
 	if err := h.db.Create(&user).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Пользователь уже существует"})
 		return

@@ -27,6 +27,10 @@ func main() {
 		log.Fatal("не удалось выполнить миграции")
 	}
 
+	if err := services.EnsureAdmin(db, cfg.AdminEmail, cfg.AdminPassword); err != nil {
+		log.Fatal("не удалось создать администратора")
+	}
+
 	jwtService := services.NewJWTService(cfg.JWTSecret, cfg.JWTTTL)
 	billingService := services.NewBillingService(cfg)
 
@@ -34,6 +38,7 @@ func main() {
 	linkHandler := handlers.NewLinkHandler(db, cfg)
 	userHandler := handlers.NewUserHandler(db, cfg)
 	billingHandler := handlers.NewBillingHandler(db, billingService)
+	adminHandler := handlers.NewAdminHandler(db)
 
 	r := gin.Default()
 	r.Static("/static", "web/static")
@@ -43,6 +48,7 @@ func main() {
 	r.GET("/register", func(c *gin.Context) { c.File("web/register.html") })
 	r.GET("/dashboard", func(c *gin.Context) { c.File("web/dashboard.html") })
 	r.GET("/stats", func(c *gin.Context) { c.File("web/stats.html") })
+	r.GET("/admin", func(c *gin.Context) { c.File("web/admin.html") })
 
 	r.GET("/api/config", handlers.ConfigHandler(cfg))
 	r.POST("/api/register", authHandler.Register)
@@ -51,13 +57,19 @@ func main() {
 	r.GET("/i/:code", linkHandler.Redirect)
 
 	auth := r.Group("/api")
-	auth.Use(middleware.JWTAuth(jwtService))
+	auth.Use(middleware.JWTAuth(jwtService, db))
 	auth.GET("/me", userHandler.Me)
 	auth.GET("/links", linkHandler.List)
 	auth.POST("/links", linkHandler.Create)
 	auth.GET("/links/:id/stats", linkHandler.Stats)
 	auth.GET("/billing/status", billingHandler.Status)
 	auth.POST("/billing/checkout", billingHandler.Checkout)
+
+	admin := auth.Group("/admin")
+	admin.Use(middleware.AdminOnly())
+	admin.GET("/users", adminHandler.Users)
+	admin.GET("/users/:id", adminHandler.UserDetail)
+	admin.DELETE("/users/:id", adminHandler.DeleteUser)
 
 	r.GET("/health", func(c *gin.Context) { c.JSON(200, gin.H{"status": "ok"}) })
 

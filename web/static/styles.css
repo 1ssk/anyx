@@ -132,6 +132,10 @@ button.ghost {
   color: #cdd7f6;
 }
 
+.hidden {
+  display: none;
+}
+
 .inline-form {
   display: flex;
   flex-wrap: wrap;
@@ -196,6 +200,12 @@ button.ghost {
   border-radius: 14px;
   border: 1px solid rgba(90, 110, 170, 0.2);
   background: rgba(8, 14, 28, 0.7);
+}
+
+.admin-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
 }
 
 .stats-header {

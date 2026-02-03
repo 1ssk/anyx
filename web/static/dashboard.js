@@ -6,6 +6,7 @@ const refreshLinks = document.getElementById('refreshLinks');
 const subscriptionStatus = document.getElementById('subscriptionStatus');
 const renewButton = document.getElementById('renewButton');
 const domainLabel = document.getElementById('domainLabel');
+const adminLink = document.getElementById('adminLink');
 
 let appDomain = window.location.host;
 
@@ -62,10 +63,16 @@ function renderLinks(links) {
 }
 
 function renderSubscription(subscription) {
+  const statusLabel = subscription.status === 'trial' ? 'Тестовый период' : subscription.status;
+  const trialLabel = subscription.trial_days_left > 0
+    ? `Осталось ${subscription.trial_days_left} дн.`
+    : 'Тестовый период завершён';
+
   subscriptionStatus.innerHTML = `
     <div class="sub-card">
       <div>
-        <h3>Статус: ${subscription.status}</h3>
+        <h3>Статус: ${statusLabel}</h3>
+        <p class="hint">${trialLabel}</p>
         <p class="hint">Пробный период до: ${formatDate(subscription.trial_ends_at)}</p>
         <p class="hint">Оплачен до: ${formatDate(subscription.current_period_end)}</p>
       </div>
@@ -87,6 +94,9 @@ async function loadUser() {
     const data = await fetchJSON('/api/me');
     userEmail.textContent = data.email;
     renderSubscription(data.subscription || {});
+    if (data.role === 'admin') {
+      adminLink.classList.remove('hidden');
+    }
   } catch (error) {
     window.location.href = '/login';
   }

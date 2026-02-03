@@ -7,6 +7,7 @@ type User struct {
 	ID           uint      `gorm:"primaryKey"`
 	Email        string    `gorm:"uniqueIndex"`
 	PasswordHash string    `gorm:"not null"`
+	Role         string    `gorm:"index"`
 	CreatedAt    time.Time
 }
 

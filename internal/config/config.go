@@ -22,6 +22,8 @@ type Config struct {
 	YooShopID      string
 	YooSecretKey   string
 	CheckoutReturn string
+	AdminEmail     string
+	AdminPassword  string
 }
 
 // Load загружает конфигурацию из .env и окружения.
@@ -40,6 +42,8 @@ func Load() Config {
 		YooShopID:      getEnv("YOOKASSA_SHOP_ID", ""),
 		YooSecretKey:   getEnv("YOOKASSA_SECRET", ""),
 		CheckoutReturn: getEnv("CHECKOUT_RETURN_URL", "http://localhost:8080/dashboard"),
+		AdminEmail:     getEnv("ADMIN_EMAIL", ""),
+		AdminPassword:  getEnv("ADMIN_PASSWORD", ""),
 	}
 
 	if cfg.JWTSecret == "" {

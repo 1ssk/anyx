@@ -49,12 +49,13 @@ func (h *UserHandler) Me(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{
 		"email": user.Email,
+		"role":  user.Role,
 		"subscription": gin.H{
-			"status":            status,
-			"trial_ends_at":     subscription.TrialEndsAt,
+			"status":             status,
+			"trial_ends_at":      subscription.TrialEndsAt,
 			"current_period_end": subscription.CurrentPeriodEnd,
-			"trial_days_left":   trialLeft,
-			"monthly_price":     h.cfg.MonthlyPrice,
+			"trial_days_left":    trialLeft,
+			"monthly_price":      h.cfg.MonthlyPrice,
 		},
 	})
 }
