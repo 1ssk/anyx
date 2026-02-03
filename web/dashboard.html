@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Invite | Дашборд</title>
+  <link rel="stylesheet" href="/static/styles.css" />
+</head>
+<body>
+  <div class="stars"></div>
+  <main class="dashboard">
+    <header class="header">
+      <div>
+        <h1>Дашборд</h1>
+        <p class="subtitle">Все ваши инвайт-ссылки и статистика</p>
+      </div>
+      <div class="user-info">
+        <span id="userEmail">loading...</span>
+        <button id="logoutButton" class="ghost">Выйти</button>
+      </div>
+    </header>
+
+    <section class="panel">
+      <h2>Создать ссылку</h2>
+      <form id="createLinkForm" class="inline-form">
+        <input type="url" name="target" placeholder="https://ваш-сайт.ru" required />
+        <button type="submit">Создать инвайт</button>
+      </form>
+      <p class="hint">Инвайт будет доступен по домену invite.annonyx.ru/i/&lt;код&gt;.</p>
+    </section>
+
+    <section class="panel">
+      <div class="panel-header">
+        <h2>Мои ссылки</h2>
+        <button id="refreshLinks" class="ghost">Обновить</button>
+      </div>
+      <div id="linksContainer" class="links"></div>
+    </section>
+
+    <section class="panel">
+      <h2>Статистика</h2>
+      <div id="statsContainer" class="stats">
+        <p class="hint">Выберите ссылку, чтобы посмотреть клики по времени.</p>
+      </div>
+    </section>
+  </main>
+  <script src="/static/dashboard.js"></script>
+</body>
+</html>
