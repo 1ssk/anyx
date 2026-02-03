@@ -56,6 +56,8 @@ func main() {
 	r.POST("/api/login", authHandler.Login)
 
 	r.POST("/api/webhook/yookassa", billingHandler.Webhook)
+	r.POST("/webhook", billingHandler.Webhook)
+	r.POST("/webhook/yookassa", billingHandler.Webhook)
 
 	r.GET("/i/:code", linkHandler.Redirect)
 

@@ -87,6 +87,7 @@ server {
 - `GET /api/links/:id/stats` — статистика кликов.
 - `POST /api/billing/checkout` — создать оплату (ЮKassa).
 - `POST /api/webhook/yookassa` — вебхук от ЮKassa.
+- `POST /webhook` — вебхук (совместим с кабинетом ЮKassa).
 - `GET /i/:code` — редирект по инвайт‑ссылке (фиксирует клик).
 - `GET /api/admin/users` — список пользователей.
 - `GET /api/admin/users/:id` — детали пользователя.
@@ -95,7 +96,7 @@ server {
 ## ЮKassa
 
 - Интеграция повторяет официальную схему: создаем платеж через API `v3/payments` с `confirmation.redirect`, используем `Idempotence-Key` и Basic Auth.
-- Вебхук ожидает событие `payment.succeeded` и активирует подписку пользователя по metadata (`user_id`, `months`).
+- Вебхук ожидает события `payment.succeeded`, `payment.waiting_for_capture`, `payment.canceled` и обновляет статус подписки.
 - Для продакшена добавьте проверку IP‑адресов и логирование входящих уведомлений.
 
 ## Что нужно доработать для продакшена

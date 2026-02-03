@@ -77,32 +77,47 @@ func (h *BillingHandler) Webhook(c *gin.Context) {
 		return
 	}
 
-	if event.Event != "payment.succeeded" || !event.Object.Paid {
+	userID := event.Object.Meta.UserID
+	if userID == 0 {
 		c.JSON(http.StatusOK, gin.H{"status": "ignored"})
 		return
 	}
 
-	userID := event.Object.Meta.UserID
-	months := event.Object.Meta.Months
-	if months <= 0 {
-		months = 1
-	}
+	switch event.Event {
+	case "payment.succeeded":
+		if !event.Object.Paid {
+			c.JSON(http.StatusOK, gin.H{"status": "ignored"})
+			return
+		}
+		months := event.Object.Meta.Months
+		if months <= 0 {
+			months = 1
+		}
 
-	var subscription models.Subscription
-	if err := h.db.Where("user_id = ?", userID).First(&subscription).Error; err != nil {
-		subscription = models.Subscription{UserID: userID}
-	}
+		var subscription models.Subscription
+		if err := h.db.Where("user_id = ?", userID).First(&subscription).Error; err != nil {
+			subscription = models.Subscription{UserID: userID}
+		}
 
-	subscription.Status = "active"
-	base := time.Now()
-	if subscription.CurrentPeriodEnd.After(base) {
-		base = subscription.CurrentPeriodEnd
+		subscription.Status = "active"
+		base := time.Now()
+		if subscription.CurrentPeriodEnd.After(base) {
+			base = subscription.CurrentPeriodEnd
+		}
+		subscription.CurrentPeriodEnd = base.AddDate(0, months, 0)
+		if subscription.TrialEndsAt.IsZero() {
+			subscription.TrialEndsAt = time.Now()
+		}
+		_ = h.db.Save(&subscription).Error
+
+	case "payment.waiting_for_capture":
+		_ = h.db.Model(&models.Subscription{}).Where("user_id = ?", userID).Update("status", "pending").Error
+	case "payment.canceled":
+		_ = h.db.Model(&models.Subscription{}).Where("user_id = ?", userID).Update("status", "canceled").Error
+	default:
+		c.JSON(http.StatusOK, gin.H{"status": "ignored"})
+		return
 	}
-	subscription.CurrentPeriodEnd = base.AddDate(0, months, 0)
-	if subscription.TrialEndsAt.IsZero() {
-		subscription.TrialEndsAt = time.Now()
-	}
-	_ = h.db.Save(&subscription).Error
 
 	c.JSON(http.StatusOK, gin.H{"status": "ok"})
 }
